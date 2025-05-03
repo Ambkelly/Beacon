@@ -3,15 +3,6 @@ import { ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Briefcase, BookOpen
 
 // Color theme configuration
 const colorThemes = {
-  blue: {
-    primary: 'bg-blue-600',
-    primaryHover: 'hover:bg-blue-700',
-    primaryText: 'text-blue-600',
-    primaryLight: 'bg-blue-100',
-    primaryBorder: 'border-blue-600',
-    gradientFrom: 'from-blue-600',
-    gradientTo: 'to-blue-800'
-  },
   green: {
     primary: 'bg-green-600',
     primaryHover: 'hover:bg-green-700',
@@ -29,11 +20,118 @@ const colorThemes = {
     primaryBorder: 'border-purple-600',
     gradientFrom: 'from-purple-600',
     gradientTo: 'to-purple-800'
+  },
+  teal: {
+    primary: 'bg-teal-600',
+    primaryHover: 'hover:bg-teal-700',
+    primaryText: 'text-teal-600',
+    primaryLight: 'bg-teal-100',
+    primaryBorder: 'border-teal-600',
+    gradientFrom: 'from-teal-600',
+    gradientTo: 'to-teal-800'
   }
 };
 
+// Form Modal Component
+const FormModal = ({ isOpen, onClose, title, colorTheme }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    interest: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Here you would typically send the data to your backend
+    console.log('Form submitted:', formData);
+    alert(`Thank you, ${formData.name}! We'll be in touch soon.`);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className={`p-4 ${colorTheme.primary} rounded-t-lg flex justify-between items-center`}>
+          <h3 className="text-white text-xl font-bold">{title}</h3>
+          <button onClick={onClose} className="text-white hover:text-gray-200">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-700 mb-2">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-700 mb-2">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label htmlFor="interest" className="block text-gray-700 mb-2">What are you interested in?</label>
+            <select
+              id="interest"
+              name="interest"
+              value={formData.interest}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">Select an option</option>
+              <option value="job-matching">Job Matching</option>
+              <option value="training">Vocational Training</option>
+              <option value="career-guidance">Career Guidance</option>
+              <option value="financial-literacy">Financial Literacy</option>
+            </select>
+          </div>
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`px-4 py-2 rounded-md text-white ${colorTheme.primary} ${colorTheme.primaryHover}`}
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // Page components
-const HomePage = ({ colorTheme }) => (
+const HomePage = ({ colorTheme, openForm }) => (
   <>
     {/* Hero Section */}
     <section className={`relative bg-gradient-to-r ${colorTheme.gradientFrom} ${colorTheme.gradientTo} text-white`}>
@@ -42,7 +140,10 @@ const HomePage = ({ colorTheme }) => (
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Beacon</h1>
           <p className="text-xl md:text-2xl font-semibold mb-4">Empowering People. Ending Poverty.</p>
           <p className="text-lg mb-8 opacity-90">Connecting youth and underserved communities to jobs, training, and financial tools.</p>
-          <button className={`bg-white ${colorTheme.primaryText} px-6 py-3 rounded-lg font-medium flex items-center mx-auto md:mx-0 hover:bg-gray-100 transition-colors`}>
+          <button 
+            onClick={() => openForm('getstarted')}
+            className={`bg-white ${colorTheme.primaryText} px-6 py-3 rounded-lg font-medium flex items-center mx-auto md:mx-0 hover:bg-gray-100 transition-colors`}
+          >
             Get Started
             <ArrowRight className="ml-2 h-5 w-5" />
           </button>
@@ -292,8 +393,20 @@ const TestimonialsPage = ({ colorTheme }) => {
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
-  const [currentTheme, setCurrentTheme] = useState('blue');
+  const [currentTheme, setCurrentTheme] = useState('green'); // Changed default to green
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activeForm, setActiveForm] = useState('');
   const colorTheme = colorThemes[currentTheme];
+
+  const openForm = (formType) => {
+    setActiveForm(formType);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setActiveForm('');
+  };
 
   // Close mobile menu when resizing to desktop
   useEffect(() => {
@@ -310,7 +423,7 @@ const App = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage colorTheme={colorTheme} />;
+        return <HomePage colorTheme={colorTheme} openForm={openForm} />;
       case 'technology':
         return <TechnologyPage colorTheme={colorTheme} />;
       case 'impact':
@@ -318,7 +431,21 @@ const App = () => {
       case 'testimonials':
         return <TestimonialsPage colorTheme={colorTheme} />;
       default:
-        return <HomePage colorTheme={colorTheme} />;
+        return <HomePage colorTheme={colorTheme} openForm={openForm} />;
+    }
+  };
+
+  // Render different forms based on activeForm state
+  const renderForm = () => {
+    switch (activeForm) {
+      case 'join':
+        return <FormModal isOpen={isFormOpen} onClose={closeForm} title="Join Beacon" colorTheme={colorTheme} />;
+      case 'signup':
+        return <FormModal isOpen={isFormOpen} onClose={closeForm} title="Sign Up" colorTheme={colorTheme} />;
+      case 'getstarted':
+        return <FormModal isOpen={isFormOpen} onClose={closeForm} title="Get Started" colorTheme={colorTheme} />;
+      default:
+        return null;
     }
   };
 
@@ -332,19 +459,24 @@ const App = () => {
               <span className={`text-2xl font-bold ${colorTheme.primaryText} cursor-pointer`} onClick={() => setCurrentPage('home')}>Beacon</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => setCurrentPage('home')} className="text-gray-700 hover:text-blue-600 transition-colors">Home</button>
-              <button onClick={() => setCurrentPage('technology')} className="text-gray-700 hover:text-blue-600 transition-colors">Technology</button>
-              <button onClick={() => setCurrentPage('impact')} className="text-gray-700 hover:text-blue-600 transition-colors">Impact</button>
-              <button onClick={() => setCurrentPage('testimonials')} className="text-gray-700 hover:text-blue-600 transition-colors">Stories</button>
+              <button onClick={() => setCurrentPage('home')} className={`text-gray-700 hover:${colorTheme.primaryText} transition-colors`}>Home</button>
+              <button onClick={() => setCurrentPage('technology')} className={`text-gray-700 hover:${colorTheme.primaryText} transition-colors`}>Technology</button>
+              <button onClick={() => setCurrentPage('impact')} className={`text-gray-700 hover:${colorTheme.primaryText} transition-colors`}>Impact</button>
+              <button onClick={() => setCurrentPage('testimonials')} className={`text-gray-700 hover:${colorTheme.primaryText} transition-colors`}>Stories</button>
               
               {/* Theme selector */}
               <div className="flex space-x-2">
-                <button onClick={() => setCurrentTheme('blue')} className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow"></button>
                 <button onClick={() => setCurrentTheme('green')} className="w-6 h-6 rounded-full bg-green-600 border-2 border-white shadow"></button>
                 <button onClick={() => setCurrentTheme('purple')} className="w-6 h-6 rounded-full bg-purple-600 border-2 border-white shadow"></button>
+                <button onClick={() => setCurrentTheme('teal')} className="w-6 h-6 rounded-full bg-teal-600 border-2 border-white shadow"></button>
               </div>
               
-              <button className={`${colorTheme.primary} text-white px-4 py-2 rounded-lg ${colorTheme.primaryHover} transition-colors`}>Sign Up</button>
+              <button 
+                onClick={() => openForm('signup')}
+                className={`${colorTheme.primary} text-white px-4 py-2 rounded-lg ${colorTheme.primaryHover} transition-colors`}
+              >
+                Sign Up
+              </button>
             </div>
             <div className="md:hidden flex items-center">
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700">
@@ -366,13 +498,18 @@ const App = () => {
               <div className="px-3 py-2">
                 <p className="text-sm font-medium text-gray-500 mb-1">Theme Color</p>
                 <div className="flex space-x-2">
-                  <button onClick={() => setCurrentTheme('blue')} className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow"></button>
                   <button onClick={() => setCurrentTheme('green')} className="w-6 h-6 rounded-full bg-green-600 border-2 border-white shadow"></button>
                   <button onClick={() => setCurrentTheme('purple')} className="w-6 h-6 rounded-full bg-purple-600 border-2 border-white shadow"></button>
+                  <button onClick={() => setCurrentTheme('teal')} className="w-6 h-6 rounded-full bg-teal-600 border-2 border-white shadow"></button>
                 </div>
               </div>
               
-              <button className={`w-full mt-2 ${colorTheme.primary} text-white px-4 py-2 rounded-lg ${colorTheme.primaryHover} transition-colors`}>Sign Up</button>
+              <button 
+                onClick={() => { openForm('signup'); setIsMenuOpen(false); }}
+                className={`w-full mt-2 ${colorTheme.primary} text-white px-4 py-2 rounded-lg ${colorTheme.primaryHover} transition-colors`}
+              >
+                Sign Up
+              </button>
             </div>
           </div>
         )}
@@ -386,7 +523,10 @@ const App = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Start Your Journey?</h2>
           <p className="text-xl mb-8 opacity-90">Join thousands of people who have transformed their lives with Beacon.</p>
-          <button className="bg-white text-blue-700 px-8 py-3 rounded-lg font-medium text-lg hover:bg-gray-100 transition-colors">
+          <button 
+            onClick={() => openForm('join')}
+            className="bg-white text-green-700 px-8 py-3 rounded-lg font-medium text-lg hover:bg-gray-100 transition-colors"
+          >
             Join Beacon Today
           </button>
         </div>
@@ -447,6 +587,9 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      {/* Form Modals */}
+      {renderForm()}
     </div>
   );
 };
